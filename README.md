@@ -1,5 +1,5 @@
 # LibsTableDynamicWithGraphics
-Objetivo: Utilizar uma biblioteca de tabela dinâmica com biblioteca de gráfico de maneira dinâmica.
+Objetivo: Utilizar uma biblioteca de tabela dinâmica com biblioteca de gráfico.
 ## Tecnologias
 - JavaScript
 - HTML
