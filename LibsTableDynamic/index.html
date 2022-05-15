@@ -1,0 +1,246 @@
+<html>
+<head>
+    <meta http-equiv = "content-type" content = "text/html; charset=utf-8" />   
+</head>
+<body>
+<div id="wdr-component"></div>
+<div id="wdr-container"></div>
+<div id="chartContainer"></div> 
+<link href="node_modules/webdatarocks/webdatarocks.min.css" rel="stylesheet"/>
+<script src="node_modules/webdatarocks/webdatarocks.toolbar.js"></script>
+<script src="node_modules/webdatarocks/webdatarocks.js"></script>
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.amcharts.js"></script>
+<script>
+var pivot = new WebDataRocks({
+    container: "#wdr-container",
+    beforetoolbarcreated: customizeToolbar,
+    report: {
+    "dataSource": {
+        "dataSourceType": "csv",
+        "filename": "https://cdn.webdatarocks.com/data/data.csv"
+    },
+    "slice": {
+        "rows": [
+            {
+                "uniqueName": "Destination"
+            },
+            {
+                "uniqueName": "Measures"
+            }
+        ],
+        "columns": [
+            {
+                "uniqueName": "Category"
+            },
+            {
+                "uniqueName": "Country"
+            }
+        ],
+        "measures": [
+            {
+                "uniqueName": "Price",
+                "aggregation": "stdevp"
+            },
+            {
+                "uniqueName": "Sample Standard Deviation",
+                "formula": "stdevs(\"Price\") ",
+                "caption": "Sample StDev of Price"
+            }
+        ],
+        "expands": {
+            "columns": [
+                {
+                    "tuple": [
+                        "Category.Accessories"
+                    ]
+                }
+            ]
+        }
+    },
+    "conditions": [
+        {
+            "formula": "#value > 1500",
+            "measure": "Price",
+            "format": {
+                "backgroundColor": "#0598df",
+                "color": "#FFFFFF",
+                "fontFamily": "Arial",
+                "fontSize": "12px"
+            }
+        },
+        {
+            "formula": "#value > 1500",
+            "measure": "Sample Standard Deviation",
+            "format": {
+                "backgroundColor": "#f45328",
+                "color": "#FFFFFF",
+                "fontFamily": "Arial",
+                "fontSize": "12px"
+            }
+        }
+    ],
+    "formats": [
+        {
+            "name": "",
+            "thousandsSeparator": " ",
+            "decimalSeparator": ".",
+            "decimalPlaces": 2,
+            "maxSymbols": 20,
+            "currencySymbol": "",
+            "currencySymbolAlign": "left",
+            "nullValue": " ",
+            "infinityValue": "Infinity",
+            "divideByZeroValue": "Infinity"
+        }
+    ]
+    },
+    toolbar: true,
+    reportcomplete: function() {
+        createPieChart();
+    }
+});
+
+function customizeToolbar(toolbar) {
+    // get all tabs
+    var tabs = [] //toolbar.getTabs()
+    toolbar.getTabs = function() {
+        // There will be two new tabs at the beginning of the toolbar 
+        tabs.unshift({
+            id: "wdr-tab-lightblue",
+            title: "LightBlue",
+            handler: newtabHandlerBlue,
+            icon: this.icons.format
+        }, {
+            id: "wdr-tab-default",
+            title: "Default",
+            handler: newtabHandlerDefault,
+            icon: this.icons.format
+        },{
+            id:"wdr-tab-save",
+            title: "Save",
+            handler: saveArchive,
+            icon: this.icons.save
+        });
+        return tabs;
+    }
+    var saveArchive = function(){
+        console.log("Salvando arquivo")
+    }
+    var newtabHandlerBlue = function() {
+        setLightBlueTheme();
+    };
+    var newtabHandlerDefault = function() {
+        setDefaultTheme();
+    };
+}
+
+function setLightBlueTheme() {
+    var prevThemeTags = getPrevTheme();
+    var link = document.createElement('link');
+    link.href = "https://cdn.webdatarocks.com/latest/theme/lightblue/webdatarocks.min.css";
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link["onload"] = function() {
+        if (prevThemeTags != null) {
+            for (var i = 0; i < prevThemeTags.length; i++) {
+                if (window.ActiveXObject || "ActiveXObject" in window) {
+                    prevThemeTags[i].removeNode(true);
+                } else {
+                    prevThemeTags[i].remove();
+                }
+            }
+        }
+    };
+    document.body.appendChild(link);
+}
+
+function setDefaultTheme() {
+    var prevThemeTags = getPrevTheme();
+    var link = document.createElement('link');
+    link.href = "https://cdn.webdatarocks.com/latest/webdatarocks.min.css";
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link["onload"] = function() {
+        if (prevThemeTags != null) {
+            for (var i = 0; i < prevThemeTags.length; i++) {
+                if (window.ActiveXObject || "ActiveXObject" in window) {
+                    prevThemeTags[i].removeNode(true);
+                } else {
+                    prevThemeTags[i].remove();
+                }
+            }
+        }
+    };
+    document.body.appendChild(link);
+}
+
+
+function getPrevTheme() {
+    var linkTags = document.head.getElementsByTagName("link");
+    var prevThemeTags = [];
+    for (var i = 0; i < linkTags.length; i++) {
+        if (linkTags[i].href.indexOf("webdatarocks.min.css") > -1 || linkTags[i].href.indexOf("webdatarocks.css") > -1) {
+            prevThemeTags.push(linkTags[i]);
+        }
+    }
+    linkTags = document.body.getElementsByTagName("link");
+    for (var i = 0; i < linkTags.length; i++) {
+        if (linkTags[i].href.indexOf("webdatarocks.min.css") > -1 || linkTags[i].href.indexOf("webdatarocks.css") > -1) {
+            prevThemeTags.push(linkTags[i]);
+        }
+    }
+    return prevThemeTags;
+}
+
+
+/*
+
+*/
+//criação do grafico
+var chart;
+function createPieChart() {
+    /* Get all the data from the pivot grid (alternatively, a slice can be passed to getData() as the first argument) */
+    pivot.amcharts.getData({}, drawChart, updateChart);
+}
+
+function drawChart(chartData, rawData) {
+    /* Apply amCharts theme */
+    am4core.useTheme(am4themes_animated);
+  
+    /* Create chart instance */
+    chart = am4core.create("chartContainer", am4charts.PieChart);
+  
+    /* Add data processed by WebDataRocks to the chart */
+    chart.data = chartData.data;
+    var numberFormat = pivot.amcharts.getNumberFormatPattern(rawData.meta.formats[0]);
+    
+    /* Apply number formatting to the chart */
+    chart.numberFormatter.numberFormat = numberFormat;
+    
+    /* Set an inner radius to transform a pie chart into a donut chart */
+    chart.innerRadius = am4core.percent(50);
+  
+    /* Create and configure series for a pie chart */
+    var pieSeries = chart.series.push(new am4charts.PieSeries());
+    pieSeries.dataFields.category = pivot.amcharts.getCategoryName(rawData);
+    pieSeries.dataFields.value = pivot.amcharts.getMeasureNameByIndex(rawData, 0);
+    pieSeries.slices.template.stroke = am4core.color("#fff");
+    pieSeries.slices.template.strokeWidth = 2;
+    pieSeries.slices.template.strokeOpacity = 1;
+  
+    /* Create initial animation */
+    pieSeries.hiddenState.properties.opacity = 1;
+    pieSeries.hiddenState.properties.endAngle = -90;
+    pieSeries.hiddenState.properties.startAngle = -90;
+}
+
+function updateChart(chartData, rawData) {
+    chart.dispose();
+    drawChart(chartData, rawData);
+}
+</script>
+</body>
+</html>
